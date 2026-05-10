@@ -492,17 +492,21 @@ class Spawn_UDP(Node_UDP):
 				try:
 					self.known[a[1]][1].acquire()
 					self.known[a[1]][0] += [a[0]]
+					self.known[a[1]][2].set()
 				finally: self.known[a[1]][1].release()
 			else:
-				self.known[a[1]] = [[a[0]], threading.Lock()]
+				self.known[a[1]] = [[a[0]], threading.Lock(), threading.Event()]
 
 				sock = Node_UDP(self.sock)     # kind of a hack
 				sock.sockdest = a[1]
 
 				sys.stderr.write(f"Spawn_UDP::rununtil_one: {a[0]} {a[1]}\n")
 
+				self.known[a[1]][2].set()
+
 				def _(i=i, a=self.known[a[1]]):
-					while not a[0]: time.sleep(1)      # sleep
+					while not a[0]: a[2].wait()
+					a[2].clear()
 					try:
 						a[1].acquire()
 						return a[0].pop(0)
