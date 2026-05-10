@@ -33,4 +33,4 @@ jobs:
         pyinstaller --onefile wscooker-gui.py
     - name: Test with pytest
       run: |
-        pytest
+        pytest test_all.py
