@@ -3,7 +3,6 @@ from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 import threading
 import time
 
-global v_client
 v_client = [{0: threading.Lock()},{},{},{}]
 
 def handleMessage(a, a1, a2, a3, a4):
@@ -91,5 +90,6 @@ class SimpleEcho(WebSocket):
         finally: v_client[0][0].release()
 
 
-server = SimpleWebSocketServer("", 8000, SimpleEcho)
-server.serveforever()
+if __name__ == "__main__":
+	server = SimpleWebSocketServer("", 8000, SimpleEcho)
+	server.serveforever()
