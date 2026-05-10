@@ -1,6 +1,8 @@
-import os
 import importlib
 
-for i in [ importlib.import_module(i[:-3]) for i in os.listdir() if i.endswith(".py") and not i.startswith("test_") ]: globals()[i.__name__] = i
+def test_one(i="wscooker-gui.py"): importlib.import_module(i[:-3])
+
+def test_two(i="stupid.py"): importlib.import_module(i[:-3])
+
 
 # exit(0)
