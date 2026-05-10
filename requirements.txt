@@ -1,0 +1,3 @@
+SimpleWebSocketServer
+websocket-client
+cryptography
