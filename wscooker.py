@@ -39,7 +39,7 @@ class Node_Base64:
 		self.bfunc = {'b85d': base64.b85decode,'b64d': base64.b64decode,'b32d': base64.b32decode,'b16d': base64.b16decode,'b85e': base64.b85encode,'b64e': base64.b64encode,'b32e': base64.b32encode,'b16e': base64.b16encode}[a]
 		self.ulock = threading.Barrier(2)
 
-	def recv(self, i=102000): # i is disregarded
+	def recv(self, i=10200000): # i is disregarded
 		self.ulock.wait()
 		return self.buf
 
@@ -62,9 +62,9 @@ class Node_Null(Node_Base64):
 
 	def __init__(self, a=""): pass
 
-	def recv(self, i=102000): pass
+	def recv(self, i=10200000): pass
 
-	def send(self, i=102000): pass
+	def send(self, i=10200000): pass
 
 class Node_Split(Node_Base64):
 	'<id>'
@@ -80,7 +80,7 @@ class Node_Split(Node_Base64):
 			threading.Thread(target=pushp, args=(a1[a].recv, self.send)).start()
 		else: a1[a] = self
 
-	def recv(self, i=102000):
+	def recv(self, i=10200000):
 		while not self.buf: time.sleep(1)
 		try:
 			self.ulock.acquire()
@@ -316,7 +316,7 @@ class Node_WS(Node_Base64):
 		self.close = self.ws.close
 		self.ws.send(a[1])
 
-	def recv(self, i=102000):
+	def recv(self, i=10200000):
 		try:
 			a = self.ws.recv()
 			if isinstance(a, str): a = a.encode("utf-8")
@@ -347,7 +347,7 @@ class Node_WS(Node_Base64):
 class Spawn_WS(Node_WS):
 	'<url> <init>'
 
-	def rununtil_one(self, i=102000): return Node_WS([self.argv[0], self.recv().decode("utf-8")])
+	def rununtil_one(self, i=10200000): return Node_WS([self.argv[0], self.recv().decode("utf-8")])
 
 	def spawn_one(self, i=None):
 		if not i: i=time.time()
@@ -409,7 +409,7 @@ class Node_TCP(Node_Base64):
 		self.send = self.sock.send
 		self.close = self.sock.close
 
-	def recv(self, i=102000):   # for self.sock._closed
+	def recv(self, i=10200000):   # for self.sock._closed
 		i =  self.sock.recv(i)
 		if i: return i
 		self.close()
@@ -433,7 +433,7 @@ class Spawn_TCP(Node_TCP):
 		self.sock = sock
 		self.close = self.sock.close
 
-	def rununtil_one(self, i=102000): return Node_TCP(self.sock.accept()[0])
+	def rununtil_one(self, i=10200000): return Node_TCP(self.sock.accept()[0])
 
 class Spawn_TCP_SSL(Spawn_TCP):
 	'<4|6> <0.0.0.0> <8080> <ECDHE+AESGCM:!ECDSA> <./certchain.pem> <./private.key>'
@@ -467,7 +467,7 @@ class Node_UDP(Node_Base64):
 			a = sock
 		self.sock = a
 
-	def recv(self, i=102000): return self.sock.recv(i)
+	def recv(self, i=10200000): return self.sock.recv(i)
 		
 	def send(self, i): return self.sock.sendto(i, self.sockdest)
 
@@ -485,7 +485,7 @@ class Spawn_UDP(Node_UDP):
 		self.sock = sock
 		self.known = {}
 
-	def rununtil_one(self, i = 102000):
+	def rununtil_one(self, i = 10200000):
 		while True:
 			a = self.sock.recvfrom(i)
 			if a[1] in self.known:
@@ -532,7 +532,7 @@ class Spawn_IO(Node_Base64):
 	'stdout/stdin'
 	def __init__(self, a="", ulock=[threading.Lock(),threading.Lock()]):
 		self.ulock = ulock
-	def recv(self, i=102000):
+	def recv(self, i=10200000):
 		try:
 			self.ulock[0].acquire()
 			return sys.stdin.buffer.read(i)
