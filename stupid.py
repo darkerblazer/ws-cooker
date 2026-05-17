@@ -2,6 +2,7 @@ from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 import threading
 import time
+import os
 
 v_client = [{0: threading.Lock()},{},{},{}]
 
@@ -41,7 +42,7 @@ def handleMessage(a, a1, a2, a3, a4):
 							break
 						except: time.sleep(1)
 				return
-		except Exception as e1: print(f"handleMessage::try: {e1} {a4}")
+		except Exception as e1: print(f"handleMessage::try: {repr(e1)} {a4}")
 		if i1 < 1: i1 = 1
 		a5 = [a]
 		a2 = a2[0]
@@ -54,7 +55,7 @@ def handleMessage(a, a1, a2, a3, a4):
 						try:
 							i.sendMessage(a1)
 							i1 = i1 - 1
-						except Exception as e1: print(f"handleMessage::for:try: {e1} {i}")
+						except Exception as e1: print(f"handleMessage::for:try: {repr(e1)} {i}")
 			finally: a2[0].release()
 			if i1 > 0: time.sleep(1)
 	finally: a3.release()
@@ -77,7 +78,7 @@ class SimpleEcho(WebSocket):
                 if v_client[0][self] not in v_client[1]: v_client[1][v_client[0][self]] = threading.Lock()
             if self.data: threading.Thread(target=handleMessage, args=(self, self.data, v_client, v_client[1][v_client[0][self]], v_client[0][self])).start()
         except Exception as e1:
-            print(f"handleMessage:: {e1} {self}")
+            print(f"handleMessage:: {repr(e1)} {self}")
         finally: v_client[0][0].release()
 
     def handleClose(self):
@@ -86,10 +87,12 @@ class SimpleEcho(WebSocket):
             v_client[0][0].acquire()
             v_client[0].pop(self)
         except Exception as e1:
-            print(f"close:: {e1} {self}")
+            print(f"close:: {repr(e1)} {self}")
         finally: v_client[0][0].release()
 
 
 if __name__ == "__main__":
-	server = SimpleWebSocketServer("", 8000, SimpleEcho)
-	server.serveforever()
+	try:
+		server = SimpleWebSocketServer("", 8000, SimpleEcho)
+		server.serveforever()
+	finally: os.kill(os.getpid(),9)
